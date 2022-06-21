@@ -1,0 +1,170 @@
+﻿@model IEnumerable<EasyJobHunter.ViewModel.vm_Service>
+@using Microsoft.AspNetCore.Http
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+	//ViewBag.Title = "table"; //defined in controller already, this is a shared view
+	Layout = "~/Views/Shared/_Layout.cshtml";
+
+	List<tbl_location> location = ViewBag.location;
+	List<tbl_category_s> category = ViewBag.category;
+}
+
+<a class="btn btn-default" id="btnCreateNew" onclick="loading();" href="@Url.Action("Create")" style="display:none"><span class="text-dark"><i class="fas fa-plus text-teal"></i> Create New</span></a>
+
+<div class="card" style="display:none">
+	<h4 class="card-header bg-teal">
+		@ViewBag.Title
+	</h4>
+	<div class="card-body">
+		<table class="table table-hover table-bordered" id="mydt">
+			<thead>
+				<tr>
+					<th>
+						Service ID
+					</th>
+					<th>
+						Title
+					</th>
+					<th>
+						Price
+					</th>
+					<th>
+						Location
+					</th>
+					<th>
+						Category
+					</th>
+					<th>
+						Publish
+					</th>
+					<th>
+						Created
+					</th>
+					<th>
+						Last Modified
+					</th>
+					<th></th>
+				</tr>
+			</thead>
+
+			<tbody>
+				@foreach (var item in Model)
+				{
+				<tr>
+					<td>
+						@Html.DisplayFor(modelItem => item.SERVICE.id)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.SERVICE.name)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.SERVICE.price)
+					</td>
+					<td>
+						@location.Where(x => x.id == item.SERVICE.location_id).FirstOrDefault().name
+					</td>
+					<td>
+						@foreach (var i in category.Where(x => item.cate_ids.Any(a => a == x.id)).OrderBy(x => x.name).ToList())
+						{
+							<span class="badge bg-teal mr-2">@i.name</span>
+						}
+					</td>
+					<td>
+						@(!item.SERVICE.is_publish ?"No":"Yes")
+					</td>
+					<td>
+						@(item.SERVICE.created_date.HasValue ? Convert.ToDateTime(item.SERVICE.created_date).ToString("yyyy-MM-dd , HH:mm") : "")
+						<br />
+						<a href="@Url.Action("Detail","Profile",new { id = item.SERVICE.created_by})" title="View Profile" data-toggle="tooltip">@item.SERVICE.created_by</a>
+					</td>
+					<td>
+						@(item.SERVICE.edited_date.HasValue ? Convert.ToDateTime(item.SERVICE.edited_date).ToString("yyyy-MM-dd , HH:mm") : "")
+						<br />
+						<a href="@Url.Action("Detail","Profile",new { id = item.SERVICE.edited_by})" title="View Profile" data-toggle="tooltip">@item.SERVICE.edited_by</a>
+					</td>
+					<td class="shrink">
+						<a onclick="loading();" href="@Url.Action("Edit", new { id = item.SERVICE.id })" title="Edit" data-toggle="tooltip" class="btn btn-warning"><i class="fas fa-pen"></i></a>
+						<a href="@Url.Action("Delete", new { id = item.SERVICE.id })" data-showid="@item.SERVICE.id" title="Delete" data-toggle="tooltip" class="btn btn-danger btn-delete"><i class="fas fa-trash"></i></a>
+						<a href="@Url.Action("Detail", new { id = item.SERVICE.id })" title="View" data-toggle="tooltip" class="btn btn-info"><i class="fas fa-eye"></i></a>
+					</td>
+				</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<br />
+
+<script>
+	var currentUser = '@HttpContextAccessor.HttpContext.Session.GetString("USERID")';
+	$(document).ready(function () {
+		var mydt = $('#mydt').DataTable({
+			"order": [],
+			fixedHeader: true,
+			buttons: [],
+			dom: 'Bfrtip',
+			responsive: true,
+			"autoWidth": false,
+			"initComplete": function (settings, json) {
+				$('.card').css("display", "block");
+				$("#divLoading").hide();
+				var btn_add = $("#btnCreateNew");
+				$(btn_add).show();
+				$('#mydt').closest('.dataTables_wrapper').find(".dt-buttons.btn-group.flex-wrap").append(btn_add);
+			},
+			columnDefs: [
+				{ orderable: false, targets: -1 }
+			],
+		});
+
+		mydt.columns('.hidden-col').visible(false);
+		$(".dataTables_scrollHeadInner").css({ "width": "100%" });
+		$(".table ").css({ "width": "100%" });
+		$($.fn.dataTable.tables(true)).css('width', '100%');
+		$($.fn.dataTable.tables(true)).DataTable().columns.adjust().draw();
+
+	});//$(document).ready(function () {
+
+
+
+	$('.btn-delete').click(function (e) {
+		e.preventDefault();
+		Swal.fire({
+			title: "Are You Sure?",
+			text: 'Delete #' + $(this).data('showid'),
+			type: "warning",
+			showCancelButton: true,
+			allowOutsideClick: false,
+		}).then((result) => {
+			if (result.value) {
+				loading();
+				$.ajax({
+					url: $(this).attr('href'),
+					type: "POST",
+					dataType: "text",
+					success: function (result) {
+						$("#divLoading").hide();
+						if (result) {
+							//got error msg from controller
+							console.log(result);
+							swal.fire({ type: "error", title: "Error", text: result });
+						}
+						else {
+							//no error msg
+							Swal.fire({ type: 'success', title: 'Done', showConfirmButton: false, timer: 1000 });
+							setTimeout(function () { loading(); location.reload(true); }, 1000);
+						}
+					},
+					error: function (err) {
+						$("#divLoading").hide();
+						console.log(err);
+						swal.fire({ type: "error", title: "Error"});
+					}
+				});
+			} else if (result.dismiss === Swal.DismissReason.cancel) {
+				//do nothing
+			}
+		});
+	});
+</script>

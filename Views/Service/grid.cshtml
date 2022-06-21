@@ -1,0 +1,127 @@
+﻿@model IEnumerable<EasyJobHunter.ViewModel.vm_Service>
+@using Store
+@using Microsoft.AspNetCore.Http
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+	//ViewBag.Title = "grid"; //defined in controller already, this is a shared view
+	Layout = "~/Views/Shared/_Layout_Mall.cshtml";
+
+	List<tbl_location> location = ViewBag.location;
+}
+
+<style>
+	.productimage {
+		overflow: hidden;
+		position: relative;
+		width: 260px;
+		height: 260px;
+		margin: 20px;
+		cursor: pointer;
+		position: relative;
+		object-fit: cover;
+	}
+
+	.productcard {
+		transition: all .25s linear;
+	}
+
+		.productcard:hover {
+			box-shadow: -1px 10px 29px 0px rgba(0,0,0,0.8);
+		}
+</style>
+
+<h3 class="text-navy text-bold text-center pb-3">@ViewBag.Title</h3>
+
+@if (Model.Count() > 0)
+{
+	<p class="text-center text-navy">@Model.Count() Micro Job(s) found</p>
+}
+
+
+<div class="row text-center justify-content-center">
+
+	@foreach (var i in Model)
+	{
+	<div class="productcard card m-5" style="min-width:18rem;max-width:22rem">
+
+		<img class="productimage card-img" src="@i.imagesFilePath.FirstOrDefault()" alt="" style="margin:20px auto">
+
+		<a class="card-img-overlay text-left" href="@Url.Action("Detail",new { id = i.SERVICE.id})">
+			<span class="bg-success p-2">@location.Where(x => x.id == i.SERVICE.location_id).FirstOrDefault().name</span>
+			<span class="bg-warning p-2">@i.SERVICE.created_by</span>
+		</a>
+
+		<div class="card-body border-top text-muted">@i.SERVICE.name</div>
+		<div class="card-footer text-navy">
+			<small class="">RM </small>
+			<span class="text-bold">@i.SERVICE.price</span>
+		</div>
+
+	</div><!--card-->
+
+	}
+
+
+</div><!--card-deck-->
+
+
+@if (Model.Count() == 0)
+{
+	<div class="row">
+		<div class="col-lg-6 col-md-3 col-sm-1">
+
+		</div>
+
+		<div class="col-lg-5 col-md-7 col-sm-10">
+
+			<div class="card">
+				<div class="card-body m-5 p-5">
+
+					<h1 class="h1 mt-5 mb-5 pb-5 text-navy">
+						Opps! <br /> <small>No micro job found under <cite>@ViewBag.Title</cite></small>
+					</h1>
+
+					<p class="h4 text-justify text-muted font-weight-light">
+						Now this is somewhat embarrassing.
+						<br /><br />
+						Seems like there is no micro job belongs to this page. If you believe this is caused by an error, please do not hesitate to contact administrator.
+					</p>
+
+				</div><!--card-body-->
+			</div><!--card-->
+
+		</div><!--col-->
+	</div><!--row-->
+
+
+	<script>
+
+	$('.content-wrapper').css({
+		'background-image': `url('@Url.Content("~" + "/img/wallpaper.jpg")')`,
+		'background-repeat': 'no-repeat',//Do not repeat the image
+		'background-size': 'cover',//Resize the background image to cover the entire container
+	});
+
+	</script>
+}
+else
+{
+	<script>
+    var width = $(".productcard").first().css("width");
+    $(".productcard").each(function (index) {
+      $(this).css({
+        'width': width
+      });
+    });
+	</script>
+}
+
+
+<script>
+
+	var currentUser = '@HttpContextAccessor.HttpContext.Session.GetString("USERID")';
+
+	$(document).ready(function () {
+
+	});//$(document).ready(function () {
+</script>

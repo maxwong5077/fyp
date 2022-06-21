@@ -1,0 +1,106 @@
+﻿@model EasyJobHunter.ViewModel.vm_Login_Index
+@{
+	ViewBag.Title = "Welcome";
+	Layout = "~/Views/Shared/_Layout_Login.cshtml";
+}
+@using (Html.BeginForm("", "", null, FormMethod.Post))
+{
+  <div class="input-group mb-3">
+    <input class="form-control" autocomplete="off" type="text" id="USERID" name="USERID" placeholder = "User ID..."/>
+    <div class="input-group-append">
+      <div class="input-group-text">
+        <span class="fas fa-user"></span>
+      </div>
+    </div>
+  </div>
+
+	<div class="input-group mb-3">
+    <input class="form-control" autocomplete="off" type="password" id="PASSWD" name="PASSWD" placeholder="Password..." />
+		<div class="input-group-append">
+			<div class="input-group-text">
+				<span class="fas fa-lock"></span>
+			</div>
+		</div>
+	</div>
+
+	<div class="input-group mb-3">
+		<button type="submit" class="btn bg-teal btn-block" id="confirmBTN">Log In</button>
+		<p class="text-red" id="
+			 
+			 "></p>
+	</div>
+
+	<div class="input-group mb-3">
+		<a class="btn btn-default btn-block" href="@Url.Action("Register")">Register new account</a>
+	</div>
+}
+
+<script>
+	$(document).ready(function () {
+		$("#divLoading").hide();
+
+		$('#PASSWD, #USERID').keyup(function () {
+			$('#ErrorMessage').text(null);
+		});
+
+		$("#USERID").focus();
+
+		$("#USERID").keyup(function () {
+			//allow letter, numbers and underscore only
+			//convert to uppercase as well
+			//limit length = 50
+			var val = $(this).val().toUpperCase().replace(/[^a-zA-Z0-9_]/g, '');
+			val = val.substring(0, 50);
+			$(this).val(val);
+		});
+
+		$("#confirmBTN").on('click', function (e) {
+			e.preventDefault();
+      var
+        USERID = $("#USERID").val(),
+        PASSWD = $("#PASSWD").val()
+				;
+			if (USERID && PASSWD) {
+				loading();
+				$("#confirmBTN").html('<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>Loading...');
+				var form = $('form')[0];
+				var data = new FormData(form);
+				$.ajax({
+					type: "Post",
+					url: '@Url.Action("Authenticate", "Login")',
+					data: data,
+					contentType: false,
+					processData: false,
+					success: function (response) {						
+						$("#confirmBTN").html('Sign In');
+						if (!stringIsEmptyOrWhitespace(response.errorMessage)) {
+							$("#divLoading").hide();
+							$('#ErrorMessage').text(response.errorMessage);
+						}
+						else {
+							$('#ErrorMessage').text(null)
+							var url = '@Url.Action("Index", "_Controller_")'.replace('_Controller_', response.goto);
+							window.location.href = url;
+						}
+					},
+					error: function (xhr, ajaxOptions, thrownError) {
+						$("#divLoading").hide();
+						Swal.fire({
+							type: 'error',
+							title: 'Error',
+							text: xhr.status + ' - ' + thrownError,
+							showConfirmButton: false,
+							timer: 2000
+						});
+					},
+				});//end_$.ajax(....
+			}
+			else {
+        $('#ErrorMessage').text("Do not leave blank");
+			}
+
+
+
+		})//end_$("#confirmBTN").on('click'....
+	});//end_$(document).ready....
+</script>

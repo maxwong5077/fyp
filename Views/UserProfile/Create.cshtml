@@ -1,0 +1,200 @@
+﻿@model EasyJobHunter.Models.tbl_user_profile
+@using EasyJobHunter.Models
+@using Microsoft.AspNetCore.Http
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+  ViewBag.Title = "Create User Profile";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using (Html.BeginForm())
+{
+  <div class="card">
+    <h4 class="card-header bg-teal">
+      @ViewBag.Title
+    </h4>
+    <div class="card-body">
+
+
+      <div class="form-horizontal">
+        <a class="text-dark" href="@Url.Action("Index")" onclick="loading();"><i class="fas fa-chevron-left mr-2"></i>Back to List</a>
+        <hr />
+
+        <input hidden type="text" id="created_by" name="created_by" value="@HttpContextAccessor.HttpContext.Session.GetString("USERID")" />
+        <input hidden type="text" id="created_date" name="created_date" value="@DateTime.Now" />
+
+        <div class="form-row">
+
+          <div class="form-group col-sm-3">
+            <label for="userid">Userid</label>
+            <input class="form-control" autocomplete="off" type="text" id="userid" name="userid" />
+          </div>
+
+          <div class="form-group col-sm-3">
+            <label for="password">Password</label>
+            <div class="input-group">
+              <input class="form-control" autocomplete="off" type="password" id="password" name="password" />
+              <span class="input-group-btn">
+                <button type="button" class="btn btn-default" id="showPW"><i class="far fa-eye-slash"></i></button>
+              </span>
+            </div>
+          </div>
+
+          <div class="form-group col-sm-3">
+            <label for="email">Email</label>
+            <input class="form-control" autocomplete="off" type="text" id="email" name="email" />
+          </div>
+
+          <div class="form-group col-sm-3">
+            <label for="real_name">Name</label>
+            <input class="form-control" autocomplete="off" type="text" id="real_name" name="real_name" />
+          </div>
+
+          <div class="form-group col-sm-3">
+            <label for="phone_tel">Contact No.</label>
+            <input class="form-control" autocomplete="off" type="text" id="contactno" name="contactno" />
+          </div>
+
+          <div class="form-group col-sm-9">
+            <label for="address">Address</label>
+            <input class="form-control" autocomplete="off" type="text" id="address" name="address" />
+          </div>
+
+          <div class="form-group col-sm-3">
+            <label for="role">Role</label>
+            <select class="form-control" id="role" name="role">
+              <option value="ADMIN">ADMIN</option>
+              <option value="EMPLOYER">EMPLOYER</option>
+              <option value="SEEKER" selected>SEEKER</option>
+            </select>
+          </div>
+
+        </div><!--form-row-->
+
+        <br />
+
+        <div class="form-row">
+          <div class="form-group col-sm-12">
+            <input type="submit" value="Save" class="btn bg-teal" />
+          </div>
+        </div><!--form-row-->
+
+      </div>
+
+    </div>
+  </div>
+
+}
+
+<br />
+
+<script>
+	var currentUser = '@HttpContextAccessor.HttpContext.Session.GetString("USERID")';
+
+	$("#userid").keyup(function () {
+		//allow letter, numbers and underscore only
+		//convert to uppercase as well
+		//limit length = 50
+		var val = $(this).val().toUpperCase().replace(/[^a-zA-Z0-9_]/g, '');
+		val = val.substring(0, 50);
+		$(this).val(val);
+	});
+
+	$("#showPW").on('click', function () {
+		var vis = $('#password').data("vis");
+		if (vis == null) vis = false;
+		if (vis) {
+			$('#password').clone().attr('type', 'password').insertAfter('#password').prev().remove();
+			$('#password').data("vis", false);
+			$(this).html('<i class="far fa-eye-slash"></i>');
+		}
+		else {
+			$('#password').clone().attr('type', 'text').insertAfter('#password').prev().remove();
+			$('#password').data("vis", true);
+			$(this).html('<i class="far fa-eye"></i>');
+		}
+		//How does .attr() work on the cloned element but not on the element itself?
+		//Because the cloned element is not injected to the DOM yet, while the element itself is already in the DOM.
+	});
+
+	$(document).ready(function () {
+
+
+
+	});//$(document).ready(function () {
+
+	$('input[type="submit"]').click(function (e) {
+		e.preventDefault();
+
+		var userid = $("#userid").val(),
+			created_by = $("#created_by").val(),
+			created_date = $("#created_date").val(),
+			role = $("#role").val(),
+			password = $("#password").val(),
+			real_name = $("#real_name").val(),
+			email = $("#email").val(),
+			address = $("#address").val(),
+			contactno = $("#contactno").val()
+			;
+
+		var model = new FormData();
+		model.append('userid', userid);
+		model.append('role', role);
+		model.append('created_by', created_by);
+		model.append('created_date', created_date);
+		model.append('edited_by', created_by);
+		model.append('edited_date', created_date);
+		model.append('status', 'A');
+		model.append('password', password);
+		model.append('real_name', real_name);
+		model.append('contactno', contactno);
+		model.append('email', email);
+		model.append('address', address);
+
+		if (created_by && created_date && userid && password && contactno && address && email) {
+			Swal.fire({
+				text: "Are You Sure?",
+				title: '@ViewBag.Title',
+				type: "warning",
+				showCancelButton: true,
+				allowOutsideClick: false,
+			}).then((result) => {
+				if (result.value) {
+					loading();
+					$.ajax({
+						url: "@Url.Action("Create")",
+						type: "POST",
+						dataType: "text",
+						data: model,
+						cache: false,
+						contentType: false,
+						processData: false,
+						success: function (result) {
+							$("#divLoading").hide();
+							if (result) {
+								//got error msg from controller
+								console.log(result);
+								swal.fire({ type: "error", title: "Error", text: result });
+							}
+							else {
+								//no error msg
+								Swal.fire({ type: 'success', title: 'Done', showConfirmButton: false, timer: 1000 });
+								setTimeout(function () { loading(); window.location = '@Url.Action("Index")' }, 1000);
+							}
+						},
+						error: function (err) {
+							$("#divLoading").hide();
+							console.log(err);
+							swal.fire({ type: "error", title: "Error"});
+						}
+					});
+				} else if (result.dismiss === Swal.DismissReason.cancel) {
+					//do nothing
+				}
+			});
+		}
+		else {
+			swal.fire("Do not leave blank");
+		}
+
+	});
+</script>

@@ -1,0 +1,154 @@
+﻿@model EasyJobHunter.ViewModel.vm_Login_Register
+@{
+	ViewBag.Title = "Register";
+	Layout = "~/Views/Shared/_Layout_Login.cshtml";
+}
+@using (Html.BeginForm("", "", null, FormMethod.Post))
+{
+	<div class="input-group mb-3">
+		<input class="form-control" autocomplete="off" type="text" id="USERID" name="USERID" placeholder="User ID..." />
+		<div class="input-group-append">
+			<div class="input-group-text">
+				<span class="fas fa-user"></span>
+			</div>
+		</div>
+	</div>
+
+	<div class="input-group mb-3">
+		<input class="form-control" autocomplete="off" type="text" id="NAME" name="NAME" placeholder="Ali..." />
+		<div class="input-group-append">
+			<div class="input-group-text">
+				<i class="fas fa-id-card-alt"></i>
+			</div>
+		</div>
+	</div>
+
+	<div class="input-group mb-3">
+		<input class="form-control" autocomplete="off" type="email" id="EMAIL" name="EMAIL" placeholder="abc@abc.com" />
+		<div class="input-group-append">
+			<div class="input-group-text">
+				<span class="fas fa-envelope"></span>
+			</div>
+		</div>
+	</div>
+
+	<div class="input-group mb-3">
+		<input class="form-control" autocomplete="off" type="password" id="PASSWD" name="PASSWD" placeholder="Password..." />
+		<div class="input-group-append">
+			<div class="input-group-text">
+				<span class="fas fa-lock"></span>
+			</div>
+		</div>
+	</div>
+
+	<div class="input-group mb-3">
+		<input class="form-control" autocomplete="off" type="password" id="PASSWD_CON" name="PASSWD_CON" placeholder="Confirm Password..." />
+		<div class="input-group-append">
+			<div class="input-group-text">
+				<span class="fas fa-lock"></span>
+			</div>
+		</div>
+	</div>
+
+	<div class="input-group mb-3">
+		<select class="form-control" id="ROLE" name="ROLE">
+			<option value="SEEKER" selected>JOB SEEKER</option>
+			<option value="EMPLOYER">EMPLOYER</option>
+		</select>
+		<div class="input-group-append">
+			<div class="input-group-text">
+				<span class="fas fa-user-tag"></span>
+			</div>
+		</div>
+	</div>
+
+	<div class="input-group mb-3">
+		<button type="submit" class="btn bg-teal btn-block" id="confirmBTN">Register</button>
+		<p class="text-red" id="ErrorMessage"></p>
+	</div>
+
+	<div class="input-group mb-3">
+		<a class="btn btn-default btn-block" href="@Url.Action("Index")">Already has an account? Log in now</a>
+	</div>
+}
+
+<script>
+	$(document).ready(function () {
+		$("#divLoading").hide();
+
+		$("#USERID").focus();
+
+		$('#PASSWD,#PASSWD_CON,#USERID,#EMAIL,#NAME').keyup(function () {
+			$('#ErrorMessage').text(null);
+		});
+
+		$("#USERID").keyup(function () {
+			//allow letter, numbers and underscore only
+			//convert to uppercase as well
+			//limit length = 50
+			var val = $(this).val().toUpperCase().replace(/[^a-zA-Z0-9_]/g, '');
+			val = val.substring(0, 50);
+			$(this).val(val);
+		});
+
+		$("#confirmBTN").on('click', function (e) {
+			e.preventDefault();
+      var
+        USERID = $("#USERID").val(),
+				PASSWD = $("#PASSWD").val(),
+        PASSWD_CON = $("#PASSWD_CON").val(),
+        EMAIL = $("#EMAIL").val(),
+        NAME = $("#NAME").val()
+				;
+			if (USERID && PASSWD && PASSWD_CON && EMAIL && NAME && PASSWD_CON == PASSWD) {
+				loading();
+				$("#confirmBTN").html('<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>Loading...');
+				var form = $('form')[0];
+				var data = new FormData(form);
+				$.ajax({
+					type: "Post",
+					url: '@Url.Action("Register", "Login")',
+					data: data,
+					contentType: false,
+					processData: false,
+					success: function (response) {
+
+						$("#confirmBTN").html('Register');
+
+						if (!stringIsEmptyOrWhitespace(response)) {
+							$("#divLoading").hide();
+							$('#ErrorMessage').text(response);
+						}
+						else {
+							$("#divLoading").hide();
+							$('#ErrorMessage').text(null)
+							Swal.fire({ type: 'success', title: 'Registered', text: 'You may now log in using your new account' }).then((result) => {
+								if (result.value) {
+									loading(); window.location = '@Url.Action("Index")';
+								}
+							});
+						}
+					},
+					error: function (xhr, ajaxOptions, thrownError) {
+						$("#divLoading").hide();
+						Swal.fire({
+							type: 'error',
+							title: 'Error',
+							text: xhr.status + ' - ' + thrownError,
+							showConfirmButton: false,
+							timer: 2000
+						});
+					},
+				});//end_$.ajax(....
+			}
+			else if (USERID && PASSWD && PASSWD_CON && EMAIL && NAME && PASSWD_CON != PASSWD) {
+				$('#ErrorMessage').text("Password and Confirm Password do not match");
+			}
+			else {
+        $('#ErrorMessage').text("Do not leave blank");
+			}
+
+
+		})//end_$("#confirmBTN").on('click'....
+	});//end_$(document).ready....
+</script>

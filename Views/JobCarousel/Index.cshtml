@@ -1,0 +1,179 @@
+﻿@model EasyJobHunter.ViewModel.vm_Carousel
+@using Microsoft.AspNetCore.Http
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+	ViewBag.Title = "Job Carousel";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card">
+	<h4 class="card-header bg-teal">
+		@ViewBag.Title
+	</h4>
+	<div class="card-body">
+		@using (Html.BeginForm(null, null, FormMethod.Post, new { enctype = "multipart/form-data" }))
+		{
+
+			<div class="form-horizontal">
+
+
+				<div class="form-row">
+					<div class="form-group col-sm-12">
+						<label for="prod_desc">Carousel Images</label>
+						<a class="text-dark float-right" href="@Url.Action("Index","Home")" onclick="loading();"><i class="fas fa-eye mr-2"></i>Live view</a>
+						<div class="d-flex justify-content-start">
+
+							@for (int i = 0; i < Model.cAROUSEL.Count; i++)
+							{
+								<div class="uploadimg_container ORI" data-keptimg="@Model.cAROUSEL[i].id">
+									<img src="@Model.cAROUSEL[i].file_path" class="uploadimg">
+									<div class="uploadimg_overlay"><i class="fas fa-trash"></i></div>
+								</div>
+							}
+
+							<div class="uploadimg_container EMPTY">
+								<img src="@Url.Content("~" +"/img/camera.jpg")" class="uploadimg">
+								<div class="uploadimg_overlay">@(10- Model.cAROUSEL.Count) / 10</div>
+								<input type="file" hidden accept="image/*" />
+							</div>
+
+						</div>
+
+					</div>
+				</div><!--form-row-->
+
+
+				<div class="form-row">
+					<div class="form-group col-sm-12">
+						<input type="submit" value="Save" class="btn bg-teal" />
+					</div>
+				</div><!--form-row-->
+
+			</div>
+		}
+	</div>
+</div>
+
+
+<script>
+	var currentUser = '@HttpContextAccessor.HttpContext.Session.GetString("USERID")';
+
+	var clonedplaceholder = $('.uploadimg_container.EMPTY').clone();
+	var placesleft = @(10- Model.cAROUSEL.Count);
+
+	$(document).ready(function () {
+
+	});//$(document).ready(function () {
+
+	$(document).on('click', '.uploadimg_container.EMPTY .uploadimg_overlay', function () {
+		if (placesleft > 0) {
+			$(this).next().trigger('click');
+		}
+	});
+
+	$(document).on('click', '.uploadimg_container:not(.EMPTY) .uploadimg_overlay', function () {
+		placesleft++;
+		$('.uploadimg_container.EMPTY .uploadimg_overlay').text(placesleft + ' / 10');
+		$(this).closest('.uploadimg_container').remove();
+	});
+
+	$(document).on('change', '.uploadimg_container.EMPTY input', function () {
+		var ext = $(this).val().split('.').pop().toLowerCase();
+		if ($.inArray(ext, ['gif', 'png', 'jpg', 'jpeg']) == -1) {
+			Swal.fire('Only allow images in [gif, png, jpg, jpeg] format');
+		}
+		else {
+			$(this).closest('.uploadimg_container.EMPTY').removeClass('EMPTY');
+			//load preview
+			var File = this.files;
+			if (File && File[0]) {
+				ReadImage(File[0], $(this).closest('.uploadimg_container').find('img'));
+			}
+			$(this).closest('.uploadimg_container').find('.uploadimg_overlay').html('<i class="fas fa-trash"></i>');
+
+			$(this).closest('.uploadimg_container').parent().append(clonedplaceholder.clone());
+			placesleft--;
+			$('.uploadimg_container.EMPTY .uploadimg_overlay').text(placesleft + ' / 10');
+		}
+	});
+
+	var ReadImage = function (file, imgelement) {
+		var reader = new FileReader;
+		var image = new Image;
+		reader.readAsDataURL(file);
+		reader.onload = function (_file) {
+			image.src = _file.target.result;
+			image.onload = function () {
+				$(imgelement).attr('src', _file.target.result);
+			}
+		}
+	};
+
+	$('input[type="submit"]').click(function (e) {
+		e.preventDefault();
+
+		Swal.fire({
+				text: "Are You Sure?",
+				title: '@ViewBag.Title',
+				type: "warning",
+				showCancelButton: true,
+				allowOutsideClick: false,
+			}).then((result) => {
+				if (result.value) {
+					loading();
+					var model = new FormData();
+
+					if ($('.uploadimg_container:not(.EMPTY):not(.ORI)').length) {
+						$('.uploadimg_container:not(.EMPTY):not(.ORI)').each(function () {
+							var input = $(this).find('input');
+							var File = $(input).prop('files')[0];
+							if (File) {
+								model.append('FILES', File);
+							}
+						});
+					}
+
+					if ($('.uploadimg_container.ORI').length) {
+						$('.uploadimg_container.ORI').each(function () {
+							var prodimg_id = $(this).data('keptimg');
+							model.append('ids_keptImg', prodimg_id);
+						});
+					}
+
+					$.ajax({
+						url: "@Url.Action("Edit")",
+						type: "POST",
+						data: model,//name must be same with the parameter received in controller action
+						cache: false,
+						contentType: false,
+						processData: false,
+						enctype: "multipart/form-data",
+            dataType: "text",
+						success: function (result) {
+							$("#divLoading").hide();
+							if (result) {
+								//got error msg from controller
+								console.log(result);
+								swal.fire({ type: "error", title: "Error", text: result });
+							}
+							else {
+								//no error msg
+								Swal.fire({ type: 'success', title: 'Done', showConfirmButton: false, timer: 1000 });
+								setTimeout(function () { loading(); location.reload(true); }, 1000);
+							}
+						},
+						error: function (err) {
+							$("#divLoading").hide();
+							console.log(err);
+							swal.fire({ type: "error", title: "Error"});
+						}
+					});
+
+
+				} else if (result.dismiss === Swal.DismissReason.cancel) {
+					//do nothing
+				}
+			});
+
+	});
+</script>

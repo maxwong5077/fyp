@@ -1,0 +1,112 @@
+﻿@model EasyJobHunter.Models.tbl_location
+@using Microsoft.AspNetCore.Http
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+  ViewBag.Title = "Create Location";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card">
+  <h4 class="card-header bg-teal">
+    @ViewBag.Title
+  </h4>
+  <div class="card-body">
+    @using (Html.BeginForm())
+    {
+
+      <div class="form-horizontal">
+        <a class="text-dark" href="@Url.Action("Index")" onclick="loading();"><i class="fas fa-chevron-left mr-2"></i>Back to List</a>
+        <hr />
+
+        <input hidden type="text" id="created_by" name="created_by" value="@HttpContextAccessor.HttpContext.Session.GetString("USERID")" />
+        <input hidden type="text" id="edited_by" name="edited_by" value="@HttpContextAccessor.HttpContext.Session.GetString("USERID")" />
+        <input hidden type="text" id="created_date" name="created_date" value="@DateTime.Now" />
+
+        <div class="form-row">
+
+          <div class="form-group col-sm-6">
+            <label for="location_name">Location Name</label>
+            <input class="form-control" autocomplete="off" type="text" id="location_name" name="location_name" />
+          </div>
+
+        </div><!--form-row-->
+
+        <div class="form-row">
+          <div class="form-group col-sm-12">
+            <input type="submit" value="Create" class="btn bg-teal" />
+          </div>
+        </div><!--form-row-->
+
+      </div>
+    }
+  </div>
+</div>
+
+
+<script>
+	var currentUser = '@HttpContextAccessor.HttpContext.Session.GetString("USERID")';
+	$(document).ready(function () {
+
+
+
+	});//$(document).ready(function () {
+
+	$('input[type="submit"]').click(function (e) {
+		e.preventDefault();
+
+		var edited_by = $("#edited_by").val(),
+			created_by = $("#created_by").val(),
+			created_date = $("#created_date").val(),
+			location_name = $("#location_name").val()
+			;
+		if (created_by && created_date && location_name) {
+			Swal.fire({
+				text: "Are You Sure?",
+				title: '@ViewBag.Title',
+				type: "warning",
+				showCancelButton: true,
+				allowOutsideClick: false,
+			}).then((result) => {
+				if (result.value) {
+					loading();
+					$.ajax({
+						url: "@Url.Action("Create")",
+						type: "POST",
+						dataType: "text",
+						data: {
+							edited_by: edited_by,
+							created_by: created_by,
+							created_date: created_date,
+							name: location_name,
+						},
+						success: function (result) {
+							$("#divLoading").hide();
+							if (result) {
+								//got error msg from controller
+								console.log(result);
+								swal.fire({ type: "error", title: "Error", text: result });
+							}
+							else {
+								//no error msg
+								Swal.fire({ type: 'success', title: 'Done', showConfirmButton: false, timer: 1000 });
+								setTimeout(function () { loading(); window.location = '@Url.Action("Index")'; }, 1000);
+							}
+						},
+						error: function (err) {
+							$("#divLoading").hide();
+							console.log(err);
+							swal.fire({ type: "error", title: "Error"});
+						}
+					});
+				} else if (result.dismiss === Swal.DismissReason.cancel) {
+					//do nothing
+				}
+			});
+		}
+		else {
+			swal.fire("Do not leave blank");
+		}
+
+	});
+</script>
+

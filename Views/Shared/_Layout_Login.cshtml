@@ -1,0 +1,102 @@
+﻿@using Store
+@using Microsoft.AspNetCore.Http
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>
+    @if (!string.IsNullOrWhiteSpace(ViewBag.Title))
+    {
+      @ViewBag.Title@:
+    }
+    | @Utilitarios.GetSystemName()
+  </title>
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  <link rel="icon" href="@Url.Content("~/img/logo.png")" type="image/x-icon" />
+  <link rel="shortcut icon" href="@Url.Content("~/img/logo.png")" type="image/x-icon" />
+
+  <link href="~/plugins/bootstrap-4.4.1/css/bootstrap.css" rel="stylesheet" />
+  <link href="~/plugins/bootstrap-datepicker3/bootstrap-datepicker3.min.css" rel="stylesheet" />
+  <link href="~/plugins/daterangepicker/daterangepicker.css" rel="stylesheet" />
+  <link href="~/plugins/DataTables/Nightly.dataTables.bootstrap4.min.css" rel="stylesheet" />
+  <link href="~/plugins/DataTables/Responsive-2.2.3/css/responsive.bootstrap4.css" rel="stylesheet" />
+  <link href="~/plugins/DataTables/Buttons-1.6.1/css/buttons.bootstrap4.css" rel="stylesheet" />
+  <link href="~/plugins/sweetalert2/sweetalert2.css" rel="stylesheet" />
+  <link href="~/plugins/select2/css/select2.css" rel="stylesheet" />
+  <link href="~/myStyle.css" rel="stylesheet" />
+  <link href="~/plugins/AdminLTE-3.0.1/css/adminlte.css" rel="stylesheet" />
+  <link href="~/plugins/ekko-lightbox/ekko-lightbox.css" rel="stylesheet" />
+  <link href="~/plugins/AdminLTE-3.0.1/css/adminlte.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha512-0S+nbAYis87iX26mmj/+fWt1MmaKCv80H+Mbo+Ne7ES4I6rxswpfnC6PxmLiw33Ywj2ghbtTw0FkLbMWqh4F7Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <script src="~/plugins/jquery/jquery-3.3.1.min.js"></script>
+  <script src="~/plugins/bootstrap-4.4.1/js/bootstrap.bundle.js"></script>
+  <script src="~/plugins/moment/moment.min.js"></script>
+  <script src="~/plugins/fastclick/fastclick.js"></script>
+  <script src="~/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+  <script src="~/plugins/bootstrap-datepicker3/bootstrap-datepicker.js"></script>
+  <script src="~/plugins/daterangepicker/daterangepicker.js"></script>
+  <script src="~/plugins/DataTables/DataTables-1.10.20/js/jquery.dataTables.min.js"></script>
+  <script src="~/plugins/DataTables/DataTables-1.10.20/js/dataTables.bootstrap4.js"></script>
+  <script src="~/plugins/DataTables/Buttons-1.6.1/js/dataTables.buttons.min.js"></script>
+  <script src="~/plugins/DataTables/Buttons-1.6.1/js/buttons.bootstrap4.js"></script>
+  <script src="~/plugins/DataTables/Buttons-1.6.1/js/buttons.flash.min.js"></script>
+  <script src="~/plugins/DataTables/Buttons-1.6.1/js/buttons.html5.min.js"></script>
+  <script src="~/plugins/DataTables/Buttons-1.6.1/js/buttons.print.min.js"></script>
+  <script src="~/plugins/DataTables/JSZip-2.5.0/jszip.min.js"></script>
+  <script src="~/plugins/DataTables/pdfmake-0.1.36/pdfmake/pdfmake.min.js"></script>
+  <script src="~/plugins/DataTables/pdfmake-0.1.36/pdfmake/vfs_fonts.js"></script>
+  <script src="~/plugins/DataTables/Responsive-2.2.3/js/dataTables.responsive.min.js"></script>
+  <script src="~/plugins/DataTables/Responsive-2.2.3/js/responsive.bootstrap4.min.js"></script>
+  <script src="~/plugins/sweetalert2/sweetalert2.min.js"></script>
+  <script src="~/plugins/select2/js/select2.js"></script>
+  <script src="~/plugins/validator/validator.min.js"></script>
+  <script src="~/plugins/jqueryvalidate/jquery.validate.min.js"></script>
+  <script src="~/plugins/jqueryvalidate/jquery.validate.unobtrusive.js"></script>
+  <script src="~/myScript.js"></script>
+  <script src="~/plugins/AdminLTE-3.0.1/js/adminlte.min.js"></script>
+  <script src="~/plugins/ekko-lightbox/ekko-lightbox.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/js/all.min.js" integrity="sha512-Sr1M6mlMOXTKahO1wcUzFu/kAb3iZVaQWGvxOEePRm7c2NjGRZ7ckRT6218PaSXlz8eEoFpKkDVvl2rTqKrQLA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+</head>
+<body class="login-page accent-dark" style="min-height: 512.391px;background:url(@Url.Content("~/img/wallpaper.jpg"));no-repeat center center fixed;-webkit-background-size: cover;-moz-background-size: cover;-o-background-size: cover; background-size: cover;">
+
+
+  <div class="login-box">
+    <div class="card">
+      <h4 class="card-header text-center text-teal"><b class="text-bold">@ViewBag.Title</b></h4>
+      <div class="card-body login-card-body">
+        <div class="login-logo">
+          <a href="@Url.Action("Index","Home")">
+            <img src="@Url.Content("~/img/logo.png")" style="width:100px;height:100px;text-align:center" />
+          </a>
+
+        </div>
+        <p class="text-center text-teal">
+          @Utilitarios.GetSystemName()</>
+        @RenderBody()
+    </div>
+    <!-- /.login-card-body -->
+  </div>
+</div>
+
+<div id="divLoading" style="margin: 0px; padding: 0px; position: fixed; right: 0px; top: 0px; width: 100%; height: 100%; background-color: #666666; z-index: 30001; opacity: .8; filter: alpha(opacity=70);display:none">
+  <div class="carousel-caption">
+    <div class="spinner-grow text-dark" style="width: 3rem; height: 3rem;" role="status"></div>
+    <div class="spinner-grow text-dark " style="width: 3rem; height: 3rem;" role="status"></div>
+    <div class="spinner-grow text-dark" style="width: 3rem; height: 3rem;" role="status"></div>
+  </div>
+</div>
+
+<script>
+  function loading() {
+    $("#divLoading").show();
+  }
+</script>
+
+</body>
+</html>

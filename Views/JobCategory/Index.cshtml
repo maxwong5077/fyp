@@ -1,0 +1,149 @@
+﻿@model IEnumerable<EasyJobHunter.ViewModel.vm_Category_J>
+@using Microsoft.AspNetCore.Http
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+  ViewBag.Title = "Job Category";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+	.img-category {
+		width: 30px;
+		height: 30px;
+		border-radius: 50%;
+		object-fit: cover;
+	}
+</style>
+
+<a class="btn btn-default" id="btnCreateNew" onclick="loading();" href="@Url.Action("Create")" style="display:none"><span class="text-dark"><i class="fas fa-plus text-teal"></i> Create New</span></a>
+
+<div class="card" style="display:none">
+  <h4 class="card-header bg-teal">
+    @ViewBag.Title
+  </h4>
+  <div class="card-body">
+    <table class="table table-hover table-bordered" id="mydt">
+      <thead>
+				<tr>
+					<th>
+						Category ID
+					</th>
+					<th>
+						Category Name
+					</th>
+					<th>
+						Job Count
+					</th>
+					<th></th>
+				</tr>
+      </thead>
+
+      <tbody>
+        @foreach (var item in Model)
+        {
+				<tr>
+					<td>
+						@Html.DisplayFor(modelItem => item.CATEGORY.id)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.CATEGORY.name)
+						@*@if (!string.IsNullOrEmpty(item.CATEGORY.file_path))
+						{
+							<img src="@item.CATEGORY.file_path" class="img-category ml-2" alt="@item.CATEGORY.name">
+						}*@
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.dependent)
+					</td>
+					<td>
+						<a onclick="loading();" href="@Url.Action("Edit", new { id = item.CATEGORY.id })" title="Edit" data-toggle="tooltip" class="btn btn-warning"><i class="fas fa-pen"></i></a>
+						@if (item.dependent == 0)
+						{
+							<a href="@Url.Action("Delete", new { id = item.CATEGORY.id })" data-showid="@item.CATEGORY.id" title="Delete" data-toggle="tooltip" class="btn btn-danger btn-delete"><i class="fas fa-trash"></i></a>
+						}
+						else
+						{
+							<button class="btn btn-danger" disabled title="Category is used, delete the dependency first" data-toggle="tooltip"><i class="fas fa-trash"></i></button>
+						}
+					</td>
+				</tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<br />
+
+<script>
+	var currentUser = '@HttpContextAccessor.HttpContext.Session.GetString("USERID")';
+	$(document).ready(function () {
+		var mydt = $('#mydt').DataTable({
+			"order": [],
+			fixedHeader: true,
+			buttons: [],
+			dom: 'Bfrtip',
+			responsive: true,
+			"autoWidth": false,
+			"initComplete": function (settings, json) {
+				$('.card').css("display", "block");
+				$("#divLoading").hide();
+				var btn_add = $("#btnCreateNew");
+				$(btn_add).show();
+				$('#mydt').closest('.dataTables_wrapper').find(".dt-buttons.btn-group.flex-wrap").append(btn_add);
+			},
+			columnDefs: [
+				{ orderable: false, targets: -1 }
+			],
+		});
+
+		mydt.columns('.hidden-col').visible(false);
+		$(".dataTables_scrollHeadInner").css({ "width": "100%" });
+		$(".table ").css({ "width": "100%" });
+		$($.fn.dataTable.tables(true)).css('width', '100%');
+		$($.fn.dataTable.tables(true)).DataTable().columns.adjust().draw();
+
+	});//$(document).ready(function () {
+
+
+
+	$('.btn-delete').click(function (e) {
+		e.preventDefault();
+		Swal.fire({
+			title: "Are You Sure?",
+			text: 'Delete #' + $(this).data('showid'),
+			type: "warning",
+			showCancelButton: true,
+			allowOutsideClick: false,
+		}).then((result) => {
+			if (result.value) {
+				loading();
+				$.ajax({
+					url: $(this).attr('href'),
+					type: "POST",
+					dataType: "text",
+					success: function (result) {
+						$("#divLoading").hide();
+						if (result) {
+							//got error msg from controller
+							console.log(result);
+							swal.fire({ type: "error", title: "Error", text: result });
+						}
+						else {
+							//no error msg
+							Swal.fire({ type: 'success', title: 'Done', showConfirmButton: false, timer: 1000 });
+							setTimeout(function () { loading(); window.location = '@Url.Action("Index")'; }, 1000);
+						}
+					},
+					error: function (err) {
+						$("#divLoading").hide();
+						console.log(err);
+						swal.fire({ type: "error", title: "Error"});
+					}
+				});
+			} else if (result.dismiss === Swal.DismissReason.cancel) {
+				//do nothing
+			}
+		});
+	});
+</script>

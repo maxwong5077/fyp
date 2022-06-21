@@ -1,0 +1,246 @@
+﻿@model IEnumerable<EasyJobHunter.ViewModel.vm_ServiceApplication>
+@using Microsoft.AspNetCore.Http
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	//ViewBag.Title = "table"; //defined in controller already, this is a shared view
+
+	List<tbl_location> location = ViewBag.location;
+	List<tbl_category_s> category = ViewBag.category;
+
+	string role = HttpContextAccessor.HttpContext.Session.GetString("ROLE");
+	string userid = HttpContextAccessor.HttpContext.Session.GetString("USERID");
+}
+
+<div class="card" style="display:none">
+	<h4 class="card-header bg-teal">
+		@ViewBag.Title
+	</h4>
+	<div class="card-body">
+		<table class="table table-hover table-bordered" id="mydt">
+			<thead>
+				<tr>
+					<th>
+						App.ID
+					</th>
+					<th>
+						Title
+					</th>
+					<th>
+						Price
+					</th>
+					<th>
+						Location
+					</th>
+					<th>
+						Category
+					</th>
+					<th>
+						Provider
+					</th>
+					<th>
+						Status
+					</th>
+					<th>
+						Applied
+					</th>
+					<th>
+						Last Modified
+					</th>
+					<th></th>
+				</tr>
+			</thead>
+
+			<tbody>
+				@foreach (var item in Model)
+				{
+					//two different roles
+					string provider = item.SERVICE.created_by;
+					string applicant = item.APPLICATION.created_by;
+
+					string status = "";
+					if (item.APPLICATION.status == "A")
+					{
+						status = "New";
+					}
+					else if (item.APPLICATION.status == "O")
+					{
+						status = "Accepted";
+					}
+					else if (item.APPLICATION.status == "R")
+					{
+						status = "Rejected";
+					}
+					else if (item.APPLICATION.status == "C")
+					{
+						status = "Cancelled";
+					}
+					else if (item.APPLICATION.status == "S")
+					{
+						status = "Delivered";
+					}
+					else if (item.APPLICATION.status == "D")
+					{
+						status = "Received";
+					}
+					<tr>
+						<td>
+							@Html.DisplayFor(modelItem => item.APPLICATION.id)
+						</td>
+						<td>
+							@Html.DisplayFor(modelItem => item.SERVICE.name)
+						</td>
+						<td>
+							@Html.DisplayFor(modelItem => item.SERVICE.price)
+						</td>
+						<td>
+							@location.Where(x => x.id == item.SERVICE.location_id).FirstOrDefault().name
+						</td>
+						<td>
+							@foreach (var i in category.Where(x => item.CATEGORIES.Any(a => a == x.id)).OrderBy(x => x.name).ToList())
+							{
+								<span class="badge bg-teal mr-2">@i.name</span>
+							}
+						</td>
+						<td>
+							<a href="@Url.Action("Detail","Profile",new { id = item.SERVICE.created_by})" title="View Profile" data-toggle="tooltip">@Html.DisplayFor(modelItem => item.SERVICE.created_by)</a>
+						</td>
+						<td>
+							<span class="badge bg-dark mr-2">@status</span>
+						</td>
+						<td>
+							@(item.APPLICATION.created_date.HasValue ? Convert.ToDateTime(item.APPLICATION.created_date).ToString("yyyy-MM-dd , HH:mm") : "")
+							<br />
+							<a href="@Url.Action("Detail","Profile",new { id = item.APPLICATION.created_by})" title="View Profile" data-toggle="tooltip">@Html.DisplayFor(modelItem => item.APPLICATION.created_by)</a>
+						</td>
+						<td>
+							@(item.APPLICATION.edited_date.HasValue ? Convert.ToDateTime(item.APPLICATION.edited_date).ToString("yyyy-MM-dd , HH:mm") : "")
+							<br />
+							<a href="@Url.Action("Detail","Profile",new { id = item.APPLICATION.edited_by})" title="View Profile" data-toggle="tooltip">@Html.DisplayFor(modelItem => item.APPLICATION.edited_by)</a>
+						</td>
+						<td class="shrink">
+							@if (userid == applicant && item.APPLICATION.status == "A")//applicant can cancel application when item is active (not yet process)
+							{
+								//set as cancel
+								<a data-link="@Url.Action("SetStatus", new { id = item.APPLICATION.id})" data-newstatus="C" data-showid="@item.APPLICATION.id" title="Cancel" data-toggle="tooltip" class="btn btn-warning btn-action" href="#"><i class="fas fa-ban"></i></a>
+							}
+
+							@if ((userid == provider || role == "ADMIN") && item.APPLICATION.status == "A")//admin and provider both can approve / reject when item is active (not yet process)
+							{
+								//set as accept
+								<a data-link="@Url.Action("SetStatus", new { id = item.APPLICATION.id })" data-newstatus="O" data-showid="@item.APPLICATION.id" title="Accept" data-toggle="tooltip" class="btn btn-success btn-action" href="#"><i class="fas fa-check"></i></a>
+								//set as reject
+								<a data-link="@Url.Action("SetStatus", new { id = item.APPLICATION.id })" data-newstatus="R" data-showid="@item.APPLICATION.id" title="Reject" data-toggle="tooltip" class="btn btn-warning btn-action" href="#"><i class="fas fa-ban"></i></a>
+							}
+
+							@if (userid == provider && item.APPLICATION.status == "O")//accepted task can mark as deliver by provider
+							{
+								//set as delivered
+								<a data-link="@Url.Action("SetStatus", new { id = item.APPLICATION.id })" data-newstatus="S" data-showid="@item.APPLICATION.id" title="Deliver" data-toggle="tooltip" class="btn btn-primary btn-action" href="#"><i class="fas fa-shipping-fast"></i></a>
+							}
+
+							@if (userid == applicant && item.APPLICATION.status == "S")//accepted task can mark as received by applicant
+							{
+								//set as received
+								<a data-link="@Url.Action("SetStatus", new { id = item.APPLICATION.id })" data-newstatus="D" data-showid="@item.APPLICATION.id" title="Receive" data-toggle="tooltip" class="btn btn-primary btn-action" href="#"><i class="fas fa-box-open"></i></a>
+							}
+
+							@if (userid == applicant && item.APPLICATION.status == "D")//delivered task can rate by applicant
+							{
+								//rate
+								<a href="@Url.Action("Rate",new { id = item.APPLICATION.id})" title="Rate" data-toggle="tooltip" class="btn btn-primary"><i class="fas fa-star"></i></a>
+							}
+
+							@if (role == "ADMIN")//admin can delete
+							{
+								<a data-link="@Url.Action("SetStatus", new { id = item.APPLICATION.id })" data-newstatus="V" data-showid="@item.APPLICATION.id" title="Delete" data-toggle="tooltip" class="btn btn-danger btn-action" href="#"><i class="fas fa-trash"></i></a>
+							}
+
+							<a href="@Url.Action("Detail","Service",new { id = item.SERVICE.id})" title="View Detail" data-toggle="tooltip" class="btn btn-info"><i class="fas fa-eye"></i></a>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<br />
+
+<script>
+	var currentUser = '@HttpContextAccessor.HttpContext.Session.GetString("USERID")';
+	$(document).ready(function () {
+		var mydt = $('#mydt').DataTable({
+			"order": [],
+			fixedHeader: true,
+			buttons: [],
+			dom: 'Bfrtip',
+			responsive: true,
+			"autoWidth": false,
+			"initComplete": function (settings, json) {
+				$('.card').css("display", "block");
+				$("#divLoading").hide();
+			},
+			columnDefs: [
+				{ orderable: false, targets: -1 }
+			],
+		});
+
+		mydt.columns('.hidden-col').visible(false);
+		$(".dataTables_scrollHeadInner").css({ "width": "100%" });
+		$(".table ").css({ "width": "100%" });
+		$($.fn.dataTable.tables(true)).css('width', '100%');
+		$($.fn.dataTable.tables(true)).DataTable().columns.adjust().draw();
+
+	});//$(document).ready(function () {
+
+	$('.btn-action').click(function (e) {
+		e.preventDefault();
+		var action_title = $(this).data('original-title');
+		var url = $(this).data('link');
+		var newstatus = $(this).data('newstatus');
+		var userid = currentUser;
+		var showid = $(this).data('showid');
+		Swal.fire({
+			title: "Are You Sure?",
+			text: action_title + ' #' + showid,
+			type: "warning",
+			showCancelButton: true,
+			allowOutsideClick: false,
+		}).then((result) => {
+			if (result.value) {
+				loading();
+				$.ajax({
+					url: url,
+					type: "POST",
+					data:
+					{
+						newstatus: newstatus,
+						userid: userid,
+					},
+					dataType: "text",
+					success: function (result) {
+						$("#divLoading").hide();
+						if (result) {
+							//got error msg from controller
+							console.log(result);
+							swal.fire({ type: "error", title: "Error", text: result });
+						}
+						else {
+							//no error msg
+							Swal.fire({ type: 'success', title: 'Done', showConfirmButton: false, timer: 1000 });
+							setTimeout(function () { loading(); location.reload(true); }, 1000);
+						}
+					},
+					error: function (err) {
+						$("#divLoading").hide();
+						console.log(err);
+						swal.fire({ type: "error", title: "Error"});
+					}
+				});
+			} else if (result.dismiss === Swal.DismissReason.cancel) {
+				//do nothing
+			}
+		});
+	});
+</script>

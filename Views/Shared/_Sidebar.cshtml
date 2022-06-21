@@ -1,0 +1,248 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+	//string userid = HttpContextAccessor.HttpContext.Session.GetString("USERID");
+	string role = HttpContextAccessor.HttpContext.Session.GetString("ROLE");
+}
+
+<aside class="main-sidebar elevation-4 sidebar-light-teal">
+	<!-- Brand Logo -->
+	<a href="@Url.Action("Index", "Home")" class="brand-link">
+		<img src="@Url.Content("~/img/logo.png")" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+		<span class="brand-text font-weight-light">@Utilitarios.GetSystemName()</span>
+	</a>
+
+	<!-- Sidebar -->
+	<div class="sidebar">
+		<!-- Sidebar Menu -->
+		<nav class="mt-2">
+			<ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+
+				<li class="nav-item">
+					<a id="Sidebar_ExpandAll" href="#" class="nav-link">
+
+						<i class="nav-icon fas fa-expand-arrows-alt"></i>
+						<p>
+							Expand Menu
+						</p>
+					</a>
+				</li>
+				<li class="nav-item">
+					<a id="Sidebar_CollapseAll" href="#" class="nav-link">
+						<i class="nav-icon fas fa-compress-arrows-alt"></i>
+						<p>
+							Collapse Menu
+						</p>
+					</a>
+				</li>
+				<li class="dropdown-divider"></li>
+
+				<!--my profile-->
+
+				<li class="nav-item">
+					<a href="@Url.Action("Index", "Profile")" class="nav-link @Html.IsLinkActive("", "Profile")" onclick="loading();">
+						<i class="nav-icon fas fa-home"></i>
+						<p>
+							My Profile
+						</p>
+					</a>
+				</li>
+
+				@if (role == "EMPLOYER" || role == "SEEKER")
+				{
+					<li class="nav-item has-treeview">
+						<a href="#" class="nav-link">
+							<i class="nav-icon fas fa-hand-holding-heart"></i>
+							<p>
+								I Provided
+								<i class="right fas fa-angle-left"></i>
+							</p>
+						</a>
+						<ul class="nav nav-treeview">
+							@if (role == "EMPLOYER")
+							{
+								<li class="nav-item">
+									<a href="@Url.Action("My", "Job")" class="nav-link @Html.IsLinkActive("", "Job")" onclick="loading();">
+										<i class="far fa-circle nav-icon"></i>
+										<p>
+											Jobs
+										</p>
+									</a>
+								</li>
+							}
+							@if (role == "EMPLOYER" || role == "SEEKER")
+							{
+								<li class="nav-item">
+									<a href="@Url.Action("My", "Service")" class="nav-link @Html.IsLinkActive("", "Service")" onclick="loading();">
+										<i class="far fa-circle nav-icon"></i>
+										<p>
+											Services
+										</p>
+									</a>
+								</li>
+							}
+						</ul>
+					</li>
+				}
+
+
+				@if (role == "EMPLOYER" || role == "SEEKER")
+				{
+					<li class="nav-item has-treeview">
+						<a href="#" class="nav-link">
+							<i class="nav-icon fas fa-box-open"></i>
+							<p>
+								I Received
+								<i class="right fas fa-angle-left"></i>
+							</p>
+						</a>
+						<ul class="nav nav-treeview">
+							@if (role == "EMPLOYER")
+							{
+								<li class="nav-item">
+									<a href="@Url.Action("Receive", "JobApplication")" class="nav-link @Html.IsLinkActive("Receive", "JobApplication")" onclick="loading();">
+										<i class="far fa-circle nav-icon"></i>
+										<p>
+											Job Applications
+										</p>
+									</a>
+								</li>
+							}
+							@if (role == "EMPLOYER" || role == "SEEKER")
+							{
+								<li class="nav-item">
+									<a href="@Url.Action("Receive", "ServiceApplication")" class="nav-link @Html.IsLinkActive("Receive", "ServiceApplication")" onclick="loading();">
+										<i class="far fa-circle nav-icon"></i>
+										<p>
+											Service Applications
+										</p>
+									</a>
+								</li>
+							}
+						</ul>
+					</li>
+				}
+
+
+				@if (role == "EMPLOYER" || role == "SEEKER")
+				{
+					<li class="nav-item has-treeview">
+						<a href="#" class="nav-link">
+							<i class="nav-icon fas fa-cart-plus"></i>
+							<p>
+								I Applied
+								<i class="right fas fa-angle-left"></i>
+							</p>
+						</a>
+						<ul class="nav nav-treeview">
+							@if (role == "SEEKER")
+							{
+								<li class="nav-item">
+									<a href="@Url.Action("Apply", "JobApplication")" class="nav-link @Html.IsLinkActive("Apply", "JobApplication")" onclick="loading();">
+										<i class="far fa-circle nav-icon"></i>
+										<p>
+											Job Applications
+										</p>
+									</a>
+								</li>
+							}
+							@if (role == "EMPLOYER" || role == "SEEKER")
+							{
+								<li class="nav-item">
+									<a href="@Url.Action("Apply", "ServiceApplication")" class="nav-link @Html.IsLinkActive("Apply", "ServiceApplication")" onclick="loading();">
+										<i class="far fa-circle nav-icon"></i>
+										<p>
+											Service Applications
+										</p>
+									</a>
+								</li>
+							}
+						</ul>
+					</li>
+				}
+
+
+				@if (role == "ADMIN")
+				{
+					<li class="nav-item has-treeview">
+						<a href="#" class="nav-link">
+							<i class="nav-icon fas fa-crown"></i>
+							<p>
+								Management
+								<i class="right fas fa-angle-left"></i>
+							</p>
+						</a>
+						<ul class="nav nav-treeview">
+							<li class="nav-item">
+								<a href="@Url.Action("Index", "JobCarousel")" class="nav-link @Html.IsLinkActive("Index", "JobCarousel")" onclick="loading();">
+									<i class="far fa-circle nav-icon"></i>
+									<p>Job Carousel</p>
+								</a>
+							</li>
+							<li class="nav-item">
+								<a href="@Url.Action("Index", "ServiceCarousel")" class="nav-link @Html.IsLinkActive("Index", "ServiceCarousel")" onclick="loading();">
+									<i class="far fa-circle nav-icon"></i>
+									<p>Service Carousel</p>
+								</a>
+							</li>
+							<li class="nav-item">
+								<a href="@Url.Action("Index", "UserProfile")" class="nav-link @Html.IsLinkActive("", "UserProfile")" onclick="loading();">
+									<i class="far fa-circle nav-icon"></i>
+									<p>User Profiles</p>
+								</a>
+							</li>
+							<li class="nav-item">
+								<a href="@Url.Action("Index", "Location")" class="nav-link @Html.IsLinkActive("", "Location")" onclick="loading();">
+									<i class="far fa-circle nav-icon"></i>
+									<p>Locations</p>
+								</a>
+							</li>
+							<li class="nav-item">
+								<a href="@Url.Action("Index", "JobCategory")" class="nav-link @Html.IsLinkActive("", "JobCategory")" onclick="loading();">
+									<i class="far fa-circle nav-icon"></i>
+									<p>Job Category</p>
+								</a>
+							</li>
+							<li class="nav-item">
+								<a href="@Url.Action("Index", "ServiceCategory")" class="nav-link @Html.IsLinkActive("", "ServiceCategory")" onclick="loading();">
+									<i class="far fa-circle nav-icon"></i>
+									<p>Service Category</p>
+								</a>
+							</li>
+							<li class="nav-item">
+								<a href="@Url.Action("All", "Job")" class="nav-link @Html.IsLinkActive("All", "Job")" onclick="loading();">
+									<i class="far fa-circle nav-icon"></i>
+									<p>Job List</p>
+								</a>
+							</li>
+							<li class="nav-item">
+								<a href="@Url.Action("All", "Service")" class="nav-link @Html.IsLinkActive("All", "Service")" onclick="loading();">
+									<i class="far fa-circle nav-icon"></i>
+									<p>Service List</p>
+								</a>
+							</li>
+							<li class="nav-item">
+								<a href="@Url.Action("All", "JobApplication")" class="nav-link @Html.IsLinkActive("All", "JobApplication")" onclick="loading();">
+									<i class="far fa-circle nav-icon"></i>
+									<p>All Job Application</p>
+								</a>
+							</li>
+							<li class="nav-item">
+								<a href="@Url.Action("All", "ServiceApplication")" class="nav-link @Html.IsLinkActive("All", "ServiceApplication")" onclick="loading();">
+									<i class="far fa-circle nav-icon"></i>
+									<p>All Service Application</p>
+								</a>
+							</li>
+						</ul>
+					</li>
+				}
+
+				<li class="nav-item">&nbsp;</li>
+
+			</ul>
+		</nav>
+		<!-- /.sidebar-menu -->
+
+	</div>
+	<!-- /.sidebar -->
+</aside>

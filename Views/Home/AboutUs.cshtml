@@ -1,0 +1,48 @@
+﻿@using EasyJobHunter.Models;
+@using Store;
+
+@{
+	ViewBag.Title = "About Us";
+	Layout = "~/Views/Shared/_Layout_Mall.cshtml";
+}
+<div class="row">
+	<div class="col-lg-6 col-md-3 col-sm-1">
+
+	</div>
+
+	<div class="col-lg-5 col-md-7 col-sm-10">
+
+		<div class="card">
+			<div class="card-body m-5 p-5">
+
+				<h1 class="h1 mt-5 mb-2 pb-2 text-teal">
+					@ViewBag.Title
+				</h1>
+
+				<h5 class="text-justify text-muted font-weight-light neednewline">
+					EasyJobHunter is an online job portal which innovative which is a combination of part time job search portal and online service marketplace.
+
+					EasyJobHunter connects jobseekers and recruiters by using the platform to share the job post and let jobseekers view for the job list and searching for their desired job, then with a simply and quick application way to reach jobseekers in touch with the recruiters.
+
+					EasyJobHunter also can be an online service marketplace. Freelancer are welcomed to the EasyJobHunter for selling their service to the user who required the following service.
+				</h5>
+
+			</div><!--card-body-->
+		</div><!--card-->
+
+	</div><!--col-->
+</div><!--row-->
+
+
+<script>
+
+	$('.content-wrapper').css({
+		'background-image': `url('@Url.Content("~" + "/img/wallpaper.jpg")')`,
+		'background-repeat': 'no-repeat',//Do not repeat the image
+		'background-size': 'cover',//Resize the background image to cover the entire container
+	});
+
+	$(document).ready(function () {
+
+	});//$(document).ready(function () {
+</script>

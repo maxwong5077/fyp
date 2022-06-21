@@ -1,0 +1,239 @@
+﻿.img-responsive {
+  width: 100%;
+  height: auto;
+}
+.credit-photo{
+    position:fixed;
+    bottom:0;
+    right:0;
+}
+.credit-photo, .credit-photo a{    
+    color:rgba(255,255,255,0.3);
+    text-decoration:none;
+}
+
+hr.myhrline{
+     margin: 10px;
+  }
+
+.img-circle{
+    object-fit:cover;
+}
+
+/*uploadimg image*/
+.uploadimg_container {
+  position: relative;
+  /*margin: 10px auto;*/
+  z-index: 5;
+  height: 155px;
+  width: 155px;
+  background-color: white;
+}
+
+.uploadimg {
+  display: block;
+  object-fit: cover;
+  z-index: 5;
+  height: 150px;
+  width: 150px;
+  background-color: white;
+}
+
+.uploadimg_overlay {
+  position: absolute;
+  top: 0;
+  background: rgb(0, 0, 0);
+  background: rgba(0, 0, 0, 0.5); /* Black see-through */
+  color: #f1f1f1;
+  width: 100%;
+  transition: .5s ease;
+  opacity: 0;
+  color: white;
+  font-size: 30px;
+  padding: 30% 0;
+  text-align: center;
+  line-height: 2;
+  cursor: pointer;
+  object-fit: cover;
+  z-index: 5;
+  height: 150px;
+  width: 150px;
+}
+
+.uploadimg_container:hover .uploadimg_overlay {
+  opacity: 1;
+}
+/*uploadimg image end*/
+
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+  /*to override bootstrap default css*/
+  background-color: #20c997 !important;
+  border-color: #20c997 !important;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected], .select2-container--default .select2-results__option--highlighted[aria-selected]:hover {
+  /*to override adminlte default css*/
+  background-color: #20c997 !important;
+  border-color: #20c997 !important;
+}
+
+
+td.shrink{
+     width:1%;
+     white-space:nowrap;
+}
+
+img.table-avatar {
+    border-radius: 50%;
+    display: inline;
+    width: 30px;
+    height: 30px;
+    object-fit:cover;
+}
+
+.printOnly {
+   display : none;
+}
+
+.hideScreenNPrint {
+   display: none;
+}
+
+.gonnahideintable{
+    overflow:hidden;
+    max-width:1px;
+    font-size:1px;
+}
+
+@media print {
+  .tooltip { display: none; visibility:hidden}
+  .popover { display: none;  visibility:hidden}
+}
+
+@media print {
+    .printOnly {
+       display : block;
+    }
+    .hideScreenNPrint {
+       display: none;
+    }
+    a:link:after, a:visited:after {  
+      display: none;
+      content: "";    
+    }
+}
+
+/*ScrollToTheTop_button*/
+#ScrollToTheTop_button {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 30px;
+  z-index: 99;
+  font-size: 18px;
+  border: none;
+  outline: none;
+  background-color: #d48481;
+  color: white;
+  cursor: pointer;
+  padding: 15px;
+  border-radius: 4px;
+}
+
+#ScrollToTheTop_button:hover {
+  background-color: #138496;
+}
+
+
+a.linkcursorpointer , linkcursorpointer a, linkcursorpointer{
+    cursor:pointer!important;
+}
+
+.list-group-item {
+    /*override adminlte3*/
+     margin-bottom: 2px!important; 
+}
+
+.tolower{
+    text-transform:lowercase;
+}
+
+.custom-switch {
+    /*override adminlte3*/
+    margin-left: 5px!important;
+    padding-top: 8px!important;
+}
+
+
+.text-mutedmuch{
+    color:#a1aab2!important;
+}
+
+.bg-lightgray{
+    background-color:#bababa!important;
+
+}
+
+
+.neednewline {
+  white-space: pre-line;
+}
+
+/* rating stars radio button */
+
+.rating {
+  float: left;
+}
+
+  /* :not(:checked) is a filter, so that browsers that don’t support :checked don’t 
+   follow these rules. Every browser that supports :checked also supports :not(), so
+   it doesn’t make the test unnecessarily selective */
+  .rating:not(:checked) > input {
+    position: absolute;
+    /*top:-9999px;*/
+    clip: rect(0,0,0,0);
+  }
+
+  .rating:not(:checked) > label {
+    float: right;
+    width: 1em;
+    padding: 0 .1em;
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: pointer;
+    font-size: 200%;
+    line-height: 1.2;
+    color: #ddd;
+    text-shadow: 1px 1px #bbb, 2px 2px #666, .1em .1em .2em rgba(0,0,0,.5);
+  }
+
+    .rating:not(:checked) > label:before {
+      content: '★ ';
+    }
+
+  .rating > input:checked ~ label {
+    color: gold;
+    text-shadow: 1px 1px goldenrod, 2px 2px #B57340, .1em .1em .2em rgba(0,0,0,.5);
+  }
+
+  .rating:not(:checked) > label:hover,
+  .rating:not(:checked) > label:hover ~ label {
+    color: gold;
+    text-shadow: 1px 1px goldenrod, 2px 2px #B57340, .1em .1em .2em rgba(0,0,0,.5);
+  }
+
+  .rating > input:checked + label:hover,
+  .rating > input:checked + label:hover ~ label,
+  .rating > input:checked ~ label:hover,
+  .rating > input:checked ~ label:hover ~ label,
+  .rating > label:hover ~ input:checked ~ label {
+    color: gold;
+    text-shadow: 1px 1px goldenrod, 2px 2px #B57340, .1em .1em .2em rgba(0,0,0,.5);
+  }
+
+  .rating > label:active {
+    position: relative;
+    /*top:2px;*/
+    left: 2px;
+  }

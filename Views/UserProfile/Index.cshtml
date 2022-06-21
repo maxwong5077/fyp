@@ -1,0 +1,155 @@
+﻿@model IEnumerable<EasyJobHunter.Models.tbl_user_profile>
+@using EasyJobHunter.Models
+@using Microsoft.AspNetCore.Http
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+  ViewBag.Title = "Manage Users";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+<a class="btn btn-default" id="btnCreateNew" onclick="loading();" href="@Url.Action("Create")" style="display:none"><span class="text-dark"><i class="fas fa-plus text-teal"></i> Create New</span></a>
+
+<div class="card" style="display:none">
+  <h4 class="card-header bg-teal">
+    @ViewBag.Title
+  </h4>
+  <div class="card-body">
+    <table class="table table-hover table-bordered" id="mydt">
+      <thead>
+        <tr>
+          <th>
+            Userid
+          </th>
+          <th>
+            Name
+          </th>
+          <th>
+            Role
+          </th>
+          <th>
+            Created Date
+          </th>
+          <th>
+            Created By
+          </th>
+          <th>
+            Last Modified Date
+          </th>
+          <th>
+            Last Modified By
+          </th>
+          <th></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @foreach (var item in Model)
+        {
+          <tr>
+						<td>							
+							<a href="@Url.Action("Detail","Profile",new { id = item.userid})" title="View Profile" data-toggle="tooltip">@item.userid</a>
+						</td>
+            <td>
+              @item.real_name
+            </td>
+            <td>
+              @item.role
+            </td>
+            <td>
+              @(item.created_date.HasValue ? Convert.ToDateTime(item.created_date).ToString("yyyy-MM-dd , HH:mm") : "")
+            </td>
+						<td>
+							<a href="@Url.Action("Detail","Profile",new { id = item.created_by})" title="View Profile" data-toggle="tooltip">@item.created_by</a>
+						</td>
+            <td>
+              @(item.edited_date.HasValue ? Convert.ToDateTime(item.edited_date).ToString("yyyy-MM-dd , HH:mm") : "")
+            </td>
+						<td>
+							<a href="@Url.Action("Detail","Profile",new { id = item.edited_by})" title="View Profile" data-toggle="tooltip">@item.edited_by</a>
+						</td>
+            <td class="shrink">
+              <a onclick="loading();" href="@Url.Action("Edit", new { id = item.userid })" title="Edit" data-toggle="tooltip" class="btn btn-warning"><i class="fas fa-pen"></i></a>
+              <a href="@Url.Action("Delete", new { id = item.userid })" data-showid="@item.userid" title="Delete" data-toggle="tooltip" class="btn btn-danger btn-delete"><i class="fas fa-trash"></i></a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<br />
+
+<script>
+	var currentUser = '@HttpContextAccessor.HttpContext.Session.GetString("USERID")';
+	$(document).ready(function () {
+		var mydt = $('#mydt').DataTable({
+      "order": [],
+      fixedHeader: true,
+      buttons: [],
+			dom: 'Bfrtip',
+			responsive: true,
+			"autoWidth": false,
+			"initComplete": function (settings, json) {
+				$('.card').css("display", "block");
+				$("#divLoading").hide();
+				var btn_add = $("#btnCreateNew");
+				$(btn_add).show();
+				$('#mydt').closest('.dataTables_wrapper').find(".dt-buttons.btn-group.flex-wrap").append(btn_add);
+			},
+			columnDefs: [
+				{ orderable: false, targets: -1 }
+			],
+		});
+
+		mydt.columns('.hidden-col').visible(false);
+		$(".dataTables_scrollHeadInner").css({ "width": "100%" });
+		$(".table ").css({ "width": "100%" });
+		$($.fn.dataTable.tables(true)).css('width', '100%');
+		$($.fn.dataTable.tables(true)).DataTable().columns.adjust().draw();
+
+	});//$(document).ready(function () {
+
+
+
+	$('.btn-delete').click(function (e) {
+		e.preventDefault();
+		Swal.fire({
+			title: "Are You Sure?",
+			text: 'Delete #' + $(this).data('showid'),
+			type: "warning",
+			showCancelButton: true,
+			allowOutsideClick: false,
+		}).then((result) => {
+			if (result.value) {
+				loading();
+				$.ajax({
+					url: $(this).attr('href'),
+					type: "POST",
+					dataType: "text",
+					success: function (result) {
+						$("#divLoading").hide();
+						if (result) {
+							//got error msg from controller
+							console.log(result);
+							swal.fire({ type: "error", title: "Error", text: result });
+						}
+						else {
+							//no error msg
+							Swal.fire({ type: 'success', title: 'Done', showConfirmButton: false, timer: 1000 });
+							setTimeout(function () { loading(); window.location = '@Url.Action("Index")'; }, 1000);
+						}
+					},
+					error: function (err) {
+						$("#divLoading").hide();
+						console.log(err);
+						swal.fire({ type: "error", title: "Error"});
+					}
+				});
+			} else if (result.dismiss === Swal.DismissReason.cancel) {
+				//do nothing
+			}
+		});
+	});
+</script>

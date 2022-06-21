@@ -1,0 +1,231 @@
+﻿@model EasyJobHunter.ViewModel.vm_Service
+@using EasyJobHunter.Models;
+@using EasyJobHunter;
+@using Microsoft.AspNetCore.Http
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+	ViewBag.Title = "(Micro Job) " + Model.SERVICE.name;
+	Layout = "~/Views/Shared/_Layout_Mall.cshtml";
+
+	List<tbl_location> location = ViewBag.location;
+	List<tbl_category_s> category = ViewBag.category;
+
+	var rated = Model.APPLICATION.Where(x => x.review != null && x.review != "").ToList();
+	double avg = rated.Count == 0 ? 0 : rated.Average(x => x.rating);
+}
+<div class="row justify-content-center">
+
+	<div class="card" style="max-width:80rem;min-width:80rem">
+		<div class="card-body">
+			<div class="row">
+				<div class="col-12 col-sm-4">
+					<div class="col-12" style="position: relative; text-align: center; color: white;">
+						<img src="@Model.imagesFilePath.FirstOrDefault()" class="product-image border" alt="Product Image">
+						@if (!Model.SERVICE.is_publish)
+						{
+							<div style="background-color:rgba(0,0,0,0.5);position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"><h1>Unlisted</h1></div>
+						}
+					</div>
+					<div class="col-12 product-image-thumbs card-deck justify-content-start">
+						@foreach (var i in Model.imagesFilePath)
+						{
+							<div class="card product-image-thumb @(i == Model.imagesFilePath.FirstOrDefault() ? "active" : "")">
+								<img src="@i" alt="@Model.SERVICE.name">
+							</div>
+						}
+					</div>
+				</div>
+
+				<div class="col-12 col-sm-8">
+
+					<!--Product Name-->
+					<h3 class="my-3">@Model.SERVICE.name</h3>
+
+					<!--rating & sales info-->
+					<div class="justify-content-center h5">
+						<span class="badge border p-2 mr-3">@(Math.Round(avg, 1)) <i class="fas fa-star"></i> </span>
+						<span class="badge border p-2 mr-3">@rated.Count() rating(s)</span>
+						<span class="badge border p-2 mr-3">@(Model.APPLICATION.Where(x => x.status == "D").Count())(s) Sold</span>
+					</div>
+					<hr>
+
+					<!--prices-->
+					<div class="mt-4 ml-0 pl-0">
+						<h2 class="mb-0">
+							RM @Model.SERVICE.price
+						</h2>
+
+					</div>
+
+
+					<!--Employer-->
+					<div class="text-muted">
+						<span>Provider : </span>
+						<a class="badge bg-success" href="@Url.Action("Provider", "Service", new { id = Model.SERVICE.created_by})">
+							@Model.SERVICE.created_by
+						</a>
+					</div>
+
+					<br />
+
+					<button class="btn btn-lg bg-teal btnApplyNow">
+						<i class="fas fa-cart-plus fa-lg mr-2"></i>
+						Apply Now
+					</button>
+
+
+				</div>
+			</div>
+
+			<div class="row mt-4">
+				<nav class="w-100">
+					<div class="nav nav-tabs" id="product-tab" role="tablist">
+						<a class="nav-item nav-link active" id="product-desc-tab" data-toggle="tab" href="#product-desc" role="tab" aria-controls="product-desc" aria-selected="true">Description</a>
+						<a class="nav-item nav-link" id="product-rating-tab" data-toggle="tab" href="#product-rating" role="tab" aria-controls="product-rating" aria-selected="false">Rating</a>
+					</div>
+				</nav>
+				<div class="tab-content p-3" id="nav-tabContent" style="display:block!important;width:100%!important">
+					<div class="tab-pane fade show active" id="product-desc" role="tabpanel" aria-labelledby="product-desc-tab">
+
+						<label>Category</label>
+						<h4>
+							@foreach (var i in category.Where(x => Model.cate_ids.Contains(x.id)).Select(x => x.name).ToList())
+							{
+								<span class="badge bg-teal mr-2">
+									@i
+								</span>
+							}
+						</h4>
+
+						<label>Location</label>
+						<h4>
+							<span class="badge bg-teal mr-2">
+								@location.Where(x => x.id == Model.SERVICE.location_id).FirstOrDefault().name
+							</span>
+						</h4>
+
+
+						<label>Description</label>
+						<span class="neednewline">
+							@Model.SERVICE.content
+						</span>
+
+					</div>
+					<div class="tab-pane fade" id="product-rating" role="tabpanel" aria-labelledby="product-rating-tab">
+
+						@foreach (var i in rated)
+						{
+							<div class="post">
+								<div class="user-block">
+									<span class="text-bold">@i.created_by</span>
+									<span class="ml-3 text-warning">
+										@{
+
+											int fullstar = i.rating;
+											int emptystar = 5 - i.rating;
+											for (int k = 0; k < fullstar; k++)
+											{
+												<i class="fas fa-star"></i>
+											}
+											for (int k = 0; k < emptystar; k++)
+											{
+												<i class="far fa-star"></i>
+											}
+										}
+									</span>
+									<span class="font-weight-light text-muted ml-5 float-right">@(Convert.ToDateTime(i.edited_date).ToString("yyyy-MM-dd HH:mm"))</span>
+								</div>
+								<p class="neednewline">
+									@i.review
+								</p>
+							</div>
+						}
+						@if (rated.Count() == 0)
+						{
+							<span>No ratings and reviews found</span>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- /.card-body -->
+	</div>
+
+</div><!--row-->
+
+<input hidden type="text" id="edited_by" name="edited_by" value="@HttpContextAccessor.HttpContext.Session.GetString("USERID")" />
+<input hidden type="text" id="edited_date" name="edited_date" value="@DateTime.Now" />
+
+
+<script>
+
+	var currentUser = '@HttpContextAccessor.HttpContext.Session.GetString("USERID")';
+
+	var width = $('.product-image').width();
+	$('.product-image').height(width);
+	$('.product-image').css({
+		'object-fit': 'contain',
+	});
+
+
+	$('.product-image-thumb').on('click', function () {
+		var image_element = $(this).find('img')
+		$('.product-image').prop('src', $(image_element).attr('src'))
+		$('.product-image-thumb.active').removeClass('active')
+		$(this).addClass('active');
+		//make sure big preview image is always square
+		var width = $('.product-image').width();
+		$('.product-image').height(width);
+		$('.product-image').css({
+			'object-fit': 'contain',
+		});
+	});
+
+	$('.btnApplyNow').on('click', function (e) {
+		e.preventDefault();
+		if (currentUser == '') {
+			window.location = '@Url.Action("Index","Login")';
+		}
+		else {
+
+			loading();
+			var url = '@Url.Action("Create","ServiceApplication",new { id = Model.SERVICE.id})';
+				$.ajax({
+					url: url,
+					type: "POST",
+					data:
+					{
+						id: '@Model.SERVICE.id',
+						userid:currentUser,
+					},
+					dataType: "text",
+					success: function (result) {
+						$("#divLoading").hide();
+						if (result) {
+							//got error msg from controller
+							console.log(result);
+							swal.fire({ type: "error", title: "Error", text: result });
+						}
+						else {
+							//no error msg
+							Swal.fire({ type: 'success', title: 'Done', showConfirmButton: false, timer: 1000 });
+							//refresh
+							setTimeout(function () { loading(); window.location.reload(true);  }, 1000);
+						}
+					},
+					error: function (err) {
+						$("#divLoading").hide();
+						console.log(err);
+						swal.fire({ type: "error", title: "Error"});
+					}
+				});
+
+		}//session is ok
+	});
+
+
+	$(document).ready(function () {
+
+	});//$(document).ready(function () {
+
+</script>

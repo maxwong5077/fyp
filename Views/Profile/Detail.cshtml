@@ -1,0 +1,49 @@
+﻿@model EasyJobHunter.Models.tbl_user_profile
+@{
+	ViewBag.Title = "View Profile (" + Model.real_name + ")";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card">
+	<h4 class="card-header bg-teal">
+		@ViewBag.Title
+	</h4>
+	<div class="card-body">
+		@using (Html.BeginForm())
+		{
+
+			<div class="form-horizontal">
+
+				<div class="form-row">
+
+					<div class="form-group col-sm-3">
+						<label for="userid">Userid</label>
+						<input readonly class="form-control" autocomplete="off" type="text" id="userid" name="userid" value="@Model.userid" />
+					</div>
+
+					<div class="form-group col-sm-3">
+						<label for="email">Email</label>
+						<input readonly class="form-control" autocomplete="off" type="text" id="email" name="email" value="@Model.email" />
+					</div>
+
+					<div class="form-group col-sm-3">
+						<label for="real_name">Name</label>
+						<input readonly class="form-control" autocomplete="off" type="text" id="real_name" name="real_name" value="@Model.real_name" />
+					</div>
+
+					<div class="form-group col-sm-3">
+						<label for="contactno">Contact No.</label>
+						<input readonly class="form-control" autocomplete="off" type="text" id="contactno" name="contactno" value="@Model.contactno" />
+					</div>
+
+					<div class="form-group col-sm-12">
+						<label for="address">Address</label>
+						<input readonly class="form-control" autocomplete="off" type="text" id="address" name="address" value="@Model.address" />
+					</div>
+
+				</div><!--form-row-->
+
+			</div>
+		}
+	</div>
+</div>

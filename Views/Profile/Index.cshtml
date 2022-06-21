@@ -1,0 +1,172 @@
+﻿@model EasyJobHunter.Models.tbl_user_profile
+@{
+	ViewBag.Title = "My Profile (" + Model.real_name + ")";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card">
+	<h4 class="card-header bg-teal">
+		@ViewBag.Title
+	</h4>
+	<div class="card-body">
+		@using (Html.BeginForm())
+		{
+
+		<div class="form-horizontal">
+
+			<input hidden type="text" id="edited_by" name="edited_by" value="@Model.userid" />
+			<input hidden type="text" id="edited_date" name="edited_date" value="@DateTime.Now" />
+			
+			<div class="form-row">
+
+				<div class="form-group col-sm-3">
+					<label for="userid">Userid</label>
+					<input readonly class="form-control" autocomplete="off" type="text" id="userid" name="userid" value="@Model.userid" />
+				</div>
+
+				<div class="form-group col-sm-3">
+					<label for="password">Password</label>
+					<div class="input-group">
+						<input class="form-control" autocomplete="off" type="password" id="password" name="password" value="@Model.password" />
+						<span class="input-group-btn">
+							<button type="button" class="btn btn-default" id="showPW"><i class="far fa-eye-slash"></i></button>
+						</span>
+					</div>
+				</div>
+
+				<div class="form-group col-sm-3">
+					<label for="email">Email</label>
+					<input class="form-control" autocomplete="off" type="text" id="email" name="email" value="@Model.email" />
+				</div>
+
+				<div class="form-group col-sm-3">
+					<label for="real_name">Name</label>
+					<input class="form-control" autocomplete="off" type="text" id="real_name" name="real_name" value="@Model.real_name" />
+				</div>
+
+				<div class="form-group col-sm-3">
+					<label for="contactno">Contact No.</label>
+					<input class="form-control" autocomplete="off" type="text" id="contactno" name="contactno" value="@Model.contactno" />
+				</div>
+
+				<div class="form-group col-sm-9">
+					<label for="address">Address</label>
+					<input class="form-control" autocomplete="off" type="text" id="address" name="address" value="@Model.address" />
+				</div>
+
+			</div><!--form-row-->
+
+			<div class="form-row">
+				<div class="form-group col-sm-12">
+					<input type="submit" value="Save" class="btn bg-teal" />
+				</div>
+			</div><!--form-row-->
+
+		</div>
+		}
+	</div>
+</div>
+
+
+<script>
+	var currentUser = '@Model.userid';
+
+	$("#userid").keyup(function () {
+		//allow letter, numbers and underscore only
+		//convert to uppercase as well
+		//limit length = 50
+		var val = $(this).val().toUpperCase().replace(/[^a-zA-Z0-9_]/g, '');
+		val = val.substring(0, 50);
+		$(this).val(val);
+	});
+
+	$("#showPW").on('click', function () {
+		var vis = $('#password').data("vis");
+		if (vis == null) vis = false;
+		if (vis) {
+			$('#password').clone().attr('type', 'password').insertAfter('#password').prev().remove();
+			$('#password').data("vis", false);
+			$(this).html('<i class="far fa-eye-slash"></i>');
+		}
+		else {
+			$('#password').clone().attr('type', 'text').insertAfter('#password').prev().remove();
+			$('#password').data("vis", true);
+			$(this).html('<i class="far fa-eye"></i>');
+		}
+		//How does .attr() work on the cloned element but not on the element itself?
+		//Because the cloned element is not injected to the DOM yet, while the element itself is already in the DOM.
+	});
+
+	$(document).ready(function () {
+
+
+
+	});//$(document).ready(function () {
+
+	$('input[type="submit"]').click(function (e) {
+		e.preventDefault();
+
+		var edited_by = $("#edited_by").val(),
+			edited_date = $("#edited_date").val(),
+			userid = $("#userid").val(),
+			password = $("#password").val(),
+			real_name = $("#real_name").val(),
+			contactno = $("#contactno").val(),
+			email = $("#email").val(),
+			address = $("#address").val()
+			;
+		if (edited_by && edited_date && userid && password && contactno && address && email) {
+			Swal.fire({
+				text: "Are You Sure?",
+				title: 'Save Changes',
+				type: "warning",
+				showCancelButton: true,
+				allowOutsideClick: false,
+			}).then((result) => {
+				if (result.value) {
+					loading();
+					$.ajax({
+						url: "@Url.Action("Edit")",
+						type: "POST",
+						dataType: "text",
+						data: {
+							id: edited_by,//userid
+							edited_by: edited_by,
+							edited_date: edited_date,
+							userid: userid,
+							password: password,
+							real_name: real_name,
+							contactno: contactno,
+							email: email,
+							address: address,
+						},
+						success: function (result) {
+							$("#divLoading").hide();
+							if (result) {
+								//got error msg from controller
+								console.log(result);
+								swal.fire({ type: "error", title: "Error", text: result });
+							}
+							else {
+								//no error msg
+								Swal.fire({ type: 'success', title: 'Done', showConfirmButton: false, timer: 1000 });
+								setTimeout(function () { loading(); location.reload(true); }, 1000);
+							}
+						},
+						error: function (err) {
+							$("#divLoading").hide();
+							console.log(err);
+							swal.fire({ type: "error", title: "Error"});
+						}
+					});
+				} else if (result.dismiss === Swal.DismissReason.cancel) {
+					//do nothing
+				}
+			});
+		}
+		else {
+			swal.fire("Do not leave blank");
+		}
+
+	});
+</script>

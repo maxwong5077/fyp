@@ -1,0 +1,118 @@
+﻿@model EasyJobHunter.Models.tbl_service_applications
+@using EasyJobHunter.Models;
+@{
+	ViewBag.Title = "Rating and Review on Micro Job Application #" + Model.id;
+	Layout = "~/Views/Shared/_Layout.cshtml";
+
+	string referer = Context.Request.Headers["Referer"].ToString();
+	Uri baseUri = new Uri(referer);
+}
+
+<div class="card">
+	<h4 class="card-header">
+		@ViewBag.Title
+	</h4>
+	<div class="card-body">
+		<div class="form-horizontal">
+
+			<a class="text-dark" href="@baseUri.AbsolutePath" onclick="loading();"><i class="fas fa-chevron-left mr-2"></i>Back to List</a>
+			<hr />
+
+			<div class="form-row">
+				<div class="form-group col-sm-12">
+
+					<label>Rating</label>
+
+					<div>
+						<div class="rating">
+							@for (int i = 5; i > 0; i--)
+							{
+								int st = (int)(Model.rating);
+								st = st == 0 ? 5 : st;
+								<input type="radio" id="@("star"+i)" name="rating" value="@i" @(st == i ? "checked" : "") /><label for="@("star"+i)"></label>
+							}
+						</div>
+					</div>
+					<input hidden type="number" id="starqty" name="starqty" value="@(Model.rating==0?5:Model.rating)" />
+				</div>
+
+			</div><!--form-row-->
+
+			<div class="form-row">
+				<div class="form-group col-sm-12">
+					<label for="review">Review</label>
+					<textarea class="form-control" autocomplete="off" id="review" name="review">@Model.review</textarea>
+				</div>
+			</div><!--form-row-->
+
+			<div class="form-row">
+				<div class="form-group col-sm-12">
+					<input type="submit" value="Save" class="btn bg-teal" />
+				</div>
+			</div><!--form-row-->
+
+		</div>
+	</div>
+</div>
+
+<script>
+
+	$('input[name=rating]').change(function () {
+		var ratingvalue = $('input[name=rating]:checked').val();
+		$('#starqty').val(ratingvalue);
+	});
+
+	$('input[type="submit"]').click(function (e) {
+		e.preventDefault();
+		var
+			review = $("#review").val(),
+			starqty = $("#starqty").val()
+			;
+		if (starqty && review ) {
+			Swal.fire({
+				text: "Are You Sure?",
+				title: '@ViewBag.Title',
+				type: "warning",
+				showCancelButton: true,
+				allowOutsideClick: false,
+			}).then((result) => {
+				if (result.value) {
+					loading();
+					$.ajax({
+						url: "@Url.Action("Rate")",
+						type: "POST",
+						dataType: "text",
+						data: {
+							review: review,
+							rating: starqty,
+							id: @Model.id,
+						},
+						success: function (result) {
+							$("#divLoading").hide();
+							if (result) {
+								//got error msg from controller
+								console.log(result);
+								swal.fire({ type: "error", title: "Error", text: result });
+							}
+							else {
+								//no error msg
+								Swal.fire({ type: 'success', title: 'Done', showConfirmButton: false, timer: 1000 });
+								setTimeout(function () { loading(); window.location = '@baseUri.AbsolutePath'; }, 1000);
+							}
+						},
+						error: function (err) {
+							$("#divLoading").hide();
+							console.log(err);
+							swal.fire({ type: "error", title: "Error"});
+						}
+					});
+				} else if (result.dismiss === Swal.DismissReason.cancel) {
+					//do nothing
+				}
+			});
+		}
+		else {
+			swal.fire("Do not leave blank");
+		}
+	});
+</script>
